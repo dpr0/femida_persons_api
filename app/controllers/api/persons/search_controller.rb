@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Api::SearchController < ApplicationController
+class Api::Persons::SearchController < ApplicationController
   protect_from_forgery with: :null_session
 
   api :GET, '/search?last_name=:str&first_name=:str&middle_name=:str&birthdate=:str&birthdate_year=:str&phone=:str', 'Поиск по ФИО/Др/Год рождения/Тел'
