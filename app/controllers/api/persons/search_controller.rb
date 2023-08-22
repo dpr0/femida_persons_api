@@ -4,8 +4,8 @@ class Api::Persons::SearchController < ApplicationController
   protect_from_forgery with: :null_session
   before_action :authenticate_request
 
-  api :GET, '/search?last_name=:str&first_name=:str&middle_name=:str&birthdate=:str&birthdate_year=:str&phone=:str', 'Поиск по ФИО/Др/Год рождения/Тел'
-  def index
+  api :POST, '/search?last_name=:str&first_name=:str&middle_name=:str&birthdate=:str&birthdate_year=:str&phone=:str', 'Поиск по ФИО/Др/Год рождения/Тел'
+  def create
     handler do
       prms = {}
       prms[:LastName] = person_params[:last_name].upcase if person_params[:last_name].present?
@@ -74,7 +74,7 @@ class Api::Persons::SearchController < ApplicationController
     end
     errors = []
     errors << { code: :wrong_params, message: 'wrong parameters' } if prms.blank?
-    { count: data.size, errors: errors , data: data}
+    { count: data.size, errors: errors, data: data }
   end
 
   def person_params

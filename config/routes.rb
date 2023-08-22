@@ -11,7 +11,7 @@ Rails.application.routes.draw do
     end
 
     namespace :persons do
-      resources :search, only: :index do
+      resources :search, only: :create do
         collection do
           get :by_fio
           get :by_phone
