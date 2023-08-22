@@ -7,7 +7,6 @@ class User < ApplicationRecord
   has_many :authorizations, dependent: :destroy
 
   def self.auth_by_token(headers)
-    byebug
     return unless headers['Authorization'].present?
 
     hash = JsonWebToken.decode(headers['Authorization'].split(' ').last)
