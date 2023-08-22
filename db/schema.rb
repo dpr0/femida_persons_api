@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_17_075306) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_21_103000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -51,6 +51,28 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_17_075306) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "authorizations", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "provider"
+    t.string "uid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider", "uid"], name: "index_authorizations_on_provider_and_uid"
+    t.index ["user_id"], name: "index_authorizations_on_user_id"
+  end
+
+  create_table "files", force: :cascade do |t|
+    t.integer "user_id"
+    t.date "date"
+    t.string "info"
+    t.string "filename"
+    t.string "content_type"
+    t.string "url"
+    t.datetime "deleted_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "persons_with_fts", id: false, force: :cascade do |t|
     t.bigint "ID"
     t.text "FirstName"
@@ -82,6 +104,34 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_17_075306) do
     t.index ["referat_fts_vector"], name: "persons_referat_fts_idx", using: :gin
   end
 
+  create_table "roles", force: :cascade do |t|
+    t.string "code"
+    t.string "name"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "uid"
+    t.string "name"
+    t.string "email"
+    t.string "phone"
+    t.string "provider"
+    t.string "token"
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.inet "current_sign_in_ip"
+    t.inet "last_sign_in_ip"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "authorizations", "users"
 end

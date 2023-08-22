@@ -4,18 +4,14 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '~> 3.0.5'
 gem 'apipie-rails'
 gem 'bootsnap', require: false
-gem 'cocoon'
 gem 'cssbundling-rails'
 gem 'devise'
-gem 'doorkeeper'
 gem 'dotenv-rails'
 gem 'image_processing'
 gem 'jbuilder'
 gem 'jsbundling-rails'
 gem 'jwt'
 gem 'nokogiri'
-gem 'omniauth'
-gem 'omniauth-yandex'
 gem 'pg'
 gem 'rails'
 gem 'redis'
@@ -32,8 +28,6 @@ gem 'turbo-rails'
 gem 'whenever', require: false
 gem 'sprockets-rails'
 gem 'puma', '4.3.10'
-gem 'strong_migrations'
-gem 'rtesseract'
 gem 'sassc-rails'
 
 group :development, :test do
