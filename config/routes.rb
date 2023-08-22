@@ -3,10 +3,13 @@ Rails.application.routes.draw do
   apipie
   devise_for :users
 
-  resources :users
   resources :files
 
   namespace :api do
+    resources :users, only: [:show] do
+      post :login, on: :collection
+    end
+
     namespace :persons do
       resources :search, only: :index do
         collection do
