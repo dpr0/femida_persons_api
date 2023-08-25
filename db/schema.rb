@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_21_103000) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_24_145308) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -102,6 +102,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_21_103000) do
     t.index ["Telephone"], name: "persons_telephones_gin_idx", opclass: :gin_trgm_ops, where: "(\"Telephone\" IS NOT NULL)", using: :gin
     t.index ["Telephone"], name: "persons_with_fts_telephone_idx", where: "(\"Telephone\" IS NOT NULL)"
     t.index ["referat_fts_vector"], name: "persons_referat_fts_idx", using: :gin
+  end
+
+  create_table "pg_search_documents", force: :cascade do |t|
+    t.text "content"
+    t.string "searchable_type"
+    t.bigint "searchable_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["searchable_type", "searchable_id"], name: "index_pg_search_documents_on_searchable"
   end
 
   create_table "roles", force: :cascade do |t|

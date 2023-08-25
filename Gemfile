@@ -29,6 +29,7 @@ gem 'whenever', require: false
 gem 'sprockets-rails'
 gem 'puma', '4.3.10'
 gem 'sassc-rails'
+gem 'pg_search'
 
 group :development, :test do
   gem 'debug'

@@ -2,7 +2,7 @@
 
 class Api::Persons::SearchController < ApplicationController
   protect_from_forgery with: :null_session
-  before_action :authenticate_request
+  # before_action :authenticate_request
 
   api :POST, '/search?last_name=:str&first_name=:str&middle_name=:str&birthdate=:str&birthdate_year=:str&phone=:str', 'Поиск по ФИО/Др/Год рождения/Тел'
   def create
@@ -49,6 +49,7 @@ class Api::Persons::SearchController < ApplicationController
 
   api :GET, '/search/by_address?city=:str&street=:str&building=:str&apartment=:str', 'Поиск по адресу (Город/Улица/Дома/Квартира - все необязательные поля)'
   def by_address
+    byebug
     handler do
       prms = { city: person_params[:city], street: person_params[:street] }
       prms[:building] = person_params[:building] if person_params[:building].present?
@@ -67,7 +68,7 @@ class Api::Persons::SearchController < ApplicationController
     data = if prms.present?
       Person
         .eager_load(:base)
-        .select(%i[ID FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
+        .select(%i[id FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
         .where(prms)
     else
       []
