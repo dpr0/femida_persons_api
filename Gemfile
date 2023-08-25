@@ -28,8 +28,8 @@ gem 'turbo-rails'
 gem 'whenever', require: false
 gem 'sprockets-rails'
 gem 'puma', '4.3.10'
-gem 'sassc-rails'
 gem 'pg_search'
+gem 'sassc-rails'
 
 group :development, :test do
   gem 'debug'
