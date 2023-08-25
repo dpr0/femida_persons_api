@@ -67,7 +67,7 @@ class Api::Persons::SearchController < ApplicationController
     data = if prms.present?
       Person
         .eager_load(:base)
-        .select(%i[id FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
+        .select(%i[ID FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
         .where(prms)
     else
       []
