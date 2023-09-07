@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_24_145308) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_21_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
@@ -61,20 +61,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_145308) do
     t.index ["user_id"], name: "index_authorizations_on_user_id"
   end
 
-  create_table "files", force: :cascade do |t|
-    t.integer "user_id"
-    t.date "date"
-    t.string "info"
-    t.string "filename"
-    t.string "content_type"
-    t.string "url"
-    t.datetime "deleted_at", precision: nil
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "persons_with_fts", id: false, force: :cascade do |t|
-    t.bigint "ID"
+    t.bigint "id"
     t.text "FirstName"
     t.text "LastName"
     t.text "MiddleName"
@@ -93,7 +81,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_145308) do
     t.index ["Car"], name: "persons_cars_gin_idx", opclass: :gin_trgm_ops, where: "(\"Car\" IS NOT NULL)", using: :gin
     t.index ["Car"], name: "persons_cars_idx", where: "(\"Car\" IS NOT NULL)"
     t.index ["FirstName", "MiddleName", "YearBirth", "MonthBirth", "DayBirth"], name: "persons_ioymds_idx"
-    t.index ["ID"], name: "persons_ids_idx", where: "(\"ID\" IS NOT NULL)"
     t.index ["INN"], name: "persons_inns_idx", where: "(\"INN\" IS NOT NULL)"
     t.index ["LastName", "FirstName", "MiddleName"], name: "persons_fios_idx"
     t.index ["LastName", "YearBirth", "MonthBirth", "DayBirth"], name: "persons_fymds_idx"
@@ -101,16 +88,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_24_145308) do
     t.index ["SNILS"], name: "persons_snilss_idx", where: "(\"SNILS\" IS NOT NULL)"
     t.index ["Telephone"], name: "persons_telephones_gin_idx", opclass: :gin_trgm_ops, where: "(\"Telephone\" IS NOT NULL)", using: :gin
     t.index ["Telephone"], name: "persons_with_fts_telephone_idx", where: "(\"Telephone\" IS NOT NULL)"
+    t.index ["id"], name: "persons_ids_idx", where: "(id IS NOT NULL)"
     t.index ["referat_fts_vector"], name: "persons_referat_fts_idx", using: :gin
-  end
-
-  create_table "pg_search_documents", force: :cascade do |t|
-    t.text "content"
-    t.string "searchable_type"
-    t.bigint "searchable_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["searchable_type", "searchable_id"], name: "index_pg_search_documents_on_searchable"
   end
 
   create_table "roles", force: :cascade do |t|

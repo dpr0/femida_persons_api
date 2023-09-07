@@ -2,9 +2,9 @@
 
 class Api::Persons::SearchController < ApplicationController
   protect_from_forgery with: :null_session
-  before_action :authenticate_request
+  # before_action :authenticate_request
 
-  api :POST, '/search?last_name=:str&first_name=:str&middle_name=:str&birthdate=:str&birthdate_year=:str&phone=:str', 'Поиск по ФИО/Др/Год рождения/Тел'
+  api :POST, '/search {last_name: "", first_name: "", middle_name: "", birthdate: "", birthdate_year: "", phone: ""', 'Поиск по ФИО/Др/Год рождения/Тел'
   def create
     handler do
       prms = {}
@@ -64,11 +64,25 @@ class Api::Persons::SearchController < ApplicationController
   end
 
   def search(prms)
+    dfs = DatesFromString.new
     data = if prms.present?
-      Person
-        .eager_load(:base)
-        .select(%i[ID FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
-        .where(prms)
+      Person.eager_load(:base)
+        .select(%i[id FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
+        .where(prms).map do |z|
+          z = z.attributes
+          hash = {}
+          schema = JSON.parse(z.delete('Schema'))['D']
+          inform = JSON.parse(z.delete('Information'))['D']
+          (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] }
+          z.delete('id')
+          dt = dfs.find_date("#{z.delete('DayBirth')}.#{z.delete('MonthBirth')}.#{z.delete('YearBirth')}").first&.to_date&.strftime('%d.%m.%Y')
+          hash['ДАТА РОЖДЕНИЯ'] = dt if dt.present?
+          name = [z.delete('LastName'), z.delete('FirstName'), z.delete('MiddleName')].compact.join(' ')
+          hash['ИМЯ'] = name if name.present?
+          hash['ИСТОЧНИК'] = z.delete('Base')
+          z.each { |key, value| hash[key] = value if value.present? }
+          hash
+        end
     else
       []
     end
@@ -78,6 +92,6 @@ class Api::Persons::SearchController < ApplicationController
   end
 
   def person_params
-    params.permit(%i[last_name first_name middle_name birthdate birthdate_year phone city street building apartment])
+    @params ||= params.require(:search).permit(%i[last_name first_name middle_name birthdate birthdate_year phone city street building apartment])
   end
 end
