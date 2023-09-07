@@ -92,6 +92,6 @@ class Api::Persons::SearchController < ApplicationController
   end
 
   def person_params
-    @params ||= params.require(:search).permit(%i[last_name first_name middle_name birthdate birthdate_year phone city street building apartment])
+    @params ||= params.permit(%i[last_name first_name middle_name birthdate birthdate_year phone city street building apartment])
   end
 end
