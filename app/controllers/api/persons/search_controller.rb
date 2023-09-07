@@ -73,7 +73,7 @@ class Api::Persons::SearchController < ApplicationController
           hash = {}
           schema = JSON.parse(z.delete('Schema'))['D']
           inform = JSON.parse(z.delete('Information'))['D']
-          (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] }
+          (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] if inform[i].present? }
           z.delete('id')
           dt = dfs.find_date("#{z.delete('DayBirth')}.#{z.delete('MonthBirth')}.#{z.delete('YearBirth')}").first&.to_date&.strftime('%d.%m.%Y')
           hash['ДАТА РОЖДЕНИЯ'] = dt if dt.present?
