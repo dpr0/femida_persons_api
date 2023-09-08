@@ -80,6 +80,7 @@ class Api::Persons::SearchController < ApplicationController
           name = [z.delete('LastName'), z.delete('FirstName'), z.delete('MiddleName')].compact.join(' ')
           hash['ИМЯ'] = name if name.present?
           hash['ИСТОЧНИК'] = z.delete('Base')
+          hash['ТЕЛЕФОН'] = z.delete('Telephone')
           z.each { |key, value| hash[key] = value if value.present? }
           hash
         end
