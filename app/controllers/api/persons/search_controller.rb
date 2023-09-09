@@ -2,7 +2,7 @@
 
 class Api::Persons::SearchController < ApplicationController
   protect_from_forgery with: :null_session
-  # before_action :authenticate_request
+  before_action :authenticate_request
 
   api :POST, '/search {last_name: "", first_name: "", middle_name: "", birthdate: "", birthdate_year: "", phone: ""', 'Поиск по ФИО/Др/Год рождения/Тел'
   def create
@@ -64,7 +64,6 @@ class Api::Persons::SearchController < ApplicationController
   end
 
   def search(prms)
-    dfs = DatesFromString.new
     data = if prms.present?
       Person.eager_load(:base)
         .select(%i[id FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
@@ -75,7 +74,7 @@ class Api::Persons::SearchController < ApplicationController
           inform = JSON.parse(z.delete('Information'))['D']
           (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] if inform[i].present? }
           z.delete('id')
-          dt = dfs.find_date("#{z.delete('DayBirth')}.#{z.delete('MonthBirth')}.#{z.delete('YearBirth')}").first&.to_date&.strftime('%d.%m.%Y')
+          dt = parse_date([z.delete('DayBirth'), z.delete('MonthBirth'), z.delete('YearBirth')])
           hash['ДАТА РОЖДЕНИЯ'] = dt if dt.present?
           name = [z.delete('LastName'), z.delete('FirstName'), z.delete('MiddleName')].compact.join(' ')
           hash['ИМЯ'] = name if name.present?
@@ -90,6 +89,12 @@ class Api::Persons::SearchController < ApplicationController
     errors = []
     errors << { code: :wrong_params, message: 'wrong parameters' } if prms.blank?
     { count: data.size, errors: errors, data: data }
+  end
+
+  def parse_date(array)
+    dr = array.compact.join('.')
+    dr.to_date&.strftime('%d.%m.%Y') if dr.present?
+  rescue
   end
 
   def person_params

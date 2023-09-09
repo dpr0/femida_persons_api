@@ -10,6 +10,8 @@ class User < ApplicationRecord
     return unless headers['Authorization'].present?
 
     hash = JsonWebToken.decode(headers['Authorization'].split(' ').last)
+    return if Time.at(hash['exp']) < Time.now
+
     @current_user = User.find(hash[:user_id]) if hash && hash[:user_id]
   end
 
