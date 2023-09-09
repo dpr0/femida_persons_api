@@ -75,11 +75,14 @@ class Api::Persons::SearchController < ApplicationController
           (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] if inform[i].present? }
           z.delete('id')
           dt = parse_date([z.delete('DayBirth'), z.delete('MonthBirth'), z.delete('YearBirth')])
-          hash['ДАТА РОЖДЕНИЯ'] = dt if dt.present?
           name = [z.delete('LastName'), z.delete('FirstName'), z.delete('MiddleName')].compact.join(' ')
-          hash['ИМЯ'] = name if name.present?
-          hash['ИСТОЧНИК'] = z.delete('Base')
-          hash['ТЕЛЕФОН'] = z.delete('Telephone')
+          hash['ИМЯ']           = name                  if name.present?
+          hash['ИСТОЧНИК']      = z.delete('Base')
+          hash['ПАСПОРТ']       = z.delete('Passport')  if z['Passport'].present?
+          hash['СНИЛС']         = z.delete('SNILS')     if z['SNILS'].present?
+          hash['ИНН']           = z.delete('INN')       if z['INN'].present?
+          hash['ТЕЛЕФОН']       = z.delete('Telephone') if z['Telephone'].present?
+          hash['ДАТА РОЖДЕНИЯ'] = dt                    if dt.present?
           z.each { |key, value| hash[key] = value if value.present? }
           hash
         end
