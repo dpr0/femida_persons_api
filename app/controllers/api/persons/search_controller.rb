@@ -66,14 +66,13 @@ class Api::Persons::SearchController < ApplicationController
   def search(prms)
     data = if prms.present?
       Person.eager_load(:base)
-        .select(%i[id FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
+        .select(%i[FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
         .where(prms).map do |z|
           z = z.attributes
           hash = {}
-          schema = JSON.parse(z.delete('Schema').delete("\t"))['D']
-          inform = JSON.parse(z.delete('Information').delete("\t"))['D']
+          schema = parse_json(z.delete('Schema'))
+          inform = parse_json(z.delete('Information'))
           (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] if inform[i].present? }
-          z.delete('id')
           dt = parse_date([z.delete('DayBirth'), z.delete('MonthBirth'), z.delete('YearBirth')])
           name = [z.delete('LastName'), z.delete('FirstName'), z.delete('MiddleName')].compact.join(' ')
           hash['ИМЯ']           = name                  if name.present?
@@ -92,6 +91,12 @@ class Api::Persons::SearchController < ApplicationController
     errors = []
     errors << { code: :wrong_params, message: 'wrong parameters' } if prms.blank?
     { count: data.size, errors: errors, data: data }
+  end
+
+  def parse_json(str)
+    JSON.parse(str.delete("\t"))['D']
+  rescue
+    {}
   end
 
   def parse_date(array)
