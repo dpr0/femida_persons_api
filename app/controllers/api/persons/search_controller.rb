@@ -70,8 +70,8 @@ class Api::Persons::SearchController < ApplicationController
         .where(prms).map do |z|
           z = z.attributes
           hash = {}
-          schema = JSON.parse(z.delete('Schema'))['D']
-          inform = JSON.parse(z.delete('Information'))['D']
+          schema = JSON.parse(z.delete('Schema').delete("\t"))['D']
+          inform = JSON.parse(z.delete('Information').delete("\t"))['D']
           (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] if inform[i].present? }
           z.delete('id')
           dt = parse_date([z.delete('DayBirth'), z.delete('MonthBirth'), z.delete('YearBirth')])
