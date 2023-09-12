@@ -74,14 +74,20 @@ class Api::Persons::SearchController < ApplicationController
           inform = parse_json(z.delete('Information'))
           (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] if inform[i].present? }
           dt = parse_date([z.delete('DayBirth'), z.delete('MonthBirth'), z.delete('YearBirth')])
+          dt2 = parse_date([hash.delete('ДАТА РОЖДЕНИЯ'), hash.delete('Месяц'), hash.delete('Год')])
+          dt3 = parse_date([hash.delete('Дата выдачи'), hash.delete('Мес выдачи'), hash.delete('Год выдачи')])
+          pasp = [hash.delete('Серия паспорта'), hash.delete('Номер паспорта')].compact.join
           name = [z.delete('LastName'), z.delete('FirstName'), z.delete('MiddleName')].compact.join(' ')
           hash['ИМЯ']           = name                  if name.present?
           hash['ИСТОЧНИК']      = z.delete('Base')
-          hash['ПАСПОРТ']       = z.delete('Passport')  if z['Passport'].present?
+          hash['ПАСПОРТ']       = z.delete('Passport')
+          hash['ПАСПОРТ_']      = pasp if pasp.present?
+          hash['ПАСПОРТ ВЫДАН'] = dt3 if dt3
           hash['СНИЛС']         = z.delete('SNILS')     if z['SNILS'].present?
           hash['ИНН']           = z.delete('INN')       if z['INN'].present?
           hash['ТЕЛЕФОН']       = z.delete('Telephone') if z['Telephone'].present?
           hash['ДАТА РОЖДЕНИЯ'] = dt                    if dt.present?
+          hash['ДАТА РОЖДЕНИЯ'] ||= dt2                 if dt2.present?
           z.each { |key, value| hash[key] = value if value.present? }
           hash
         end
