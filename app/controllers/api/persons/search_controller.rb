@@ -82,7 +82,7 @@ class Api::Persons::SearchController < ApplicationController
           hash['ИСТОЧНИК']      = z.delete('Base')
           hash['ПАСПОРТ']       = z.delete('Passport')
           hash['ПАСПОРТ_']      = pasp if pasp.present?
-          hash['ПАСПОРТ ВЫДАН'] = dt3 if dt3
+          hash['ПАСПОРТ_ВЫДАН'] = dt3 if dt3
           hash['СНИЛС']         = z.delete('SNILS')     if z['SNILS'].present?
           hash['ИНН']           = z.delete('INN')       if z['INN'].present?
           hash['ТЕЛЕФОН']       = z.delete('Telephone') if z['Telephone'].present?
