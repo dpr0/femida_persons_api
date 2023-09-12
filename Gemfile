@@ -30,6 +30,7 @@ gem 'sprockets-rails'
 gem 'puma', '4.3.10'
 gem 'pg_search'
 gem 'sassc-rails'
+gem 'rails_performance'
 
 group :development, :test do
   gem 'debug'
