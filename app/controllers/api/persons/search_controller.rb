@@ -19,6 +19,8 @@ class Api::Persons::SearchController < ApplicationController
       end
       prms[:YearBirth] = person_params[:birthdate_year] if person_params[:birthdate].blank? && person_params[:birthdate_year].present?
       prms[:Telephone] = person_params[:phone].last(10) if person_params[:phone].present?
+      prms[:limit] = person_params[:limit] if person_params[:limit].present?
+      prms[:offset] = person_params[:offset] if person_params[:offset].present?
       prms
     end
   end
@@ -64,39 +66,43 @@ class Api::Persons::SearchController < ApplicationController
   end
 
   def search(prms)
-    data = if prms.present?
-      Person.eager_load(:base)
+    limit = prms.delete(:limit)
+    offset = prms.delete(:offset)
+    if prms.present?
+      scope = Person.eager_load(:base)
         .select(%i[FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
-        .where(prms).map do |z|
-          z = z.attributes
-          hash = {}
-          schema = parse_json(z.delete('Schema'))
-          inform = parse_json(z.delete('Information'))
-          (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] if inform[i].present? }
-          dt = parse_date([z.delete('DayBirth'), z.delete('MonthBirth'), z.delete('YearBirth')])
-          dt2 = parse_date([hash.delete('ДАТА РОЖДЕНИЯ'), hash.delete('Месяц'), hash.delete('Год')])
-          dt3 = parse_date([hash.delete('Дата выдачи'), hash.delete('Мес выдачи'), hash.delete('Год выдачи')])
-          pasp = [hash.delete('Серия паспорта'), hash.delete('Номер паспорта')].compact.join
-          name = [z.delete('LastName'), z.delete('FirstName'), z.delete('MiddleName')].compact.join(' ')
-          hash['ИМЯ']           = name                  if name.present?
-          hash['ИСТОЧНИК']      = z.delete('Base')
-          hash['ПАСПОРТ']       = z.delete('Passport')
-          hash['ПАСПОРТ_']      = pasp if pasp.present?
-          hash['ПАСПОРТ_ВЫДАН'] = dt3 if dt3
-          hash['СНИЛС']         = z.delete('SNILS')     if z['SNILS'].present?
-          hash['ИНН']           = z.delete('INN')       if z['INN'].present?
-          hash['ТЕЛЕФОН']       = z.delete('Telephone') if z['Telephone'].present?
-          hash['ДАТА РОЖДЕНИЯ'] = dt                    if dt.present?
-          hash['ДАТА РОЖДЕНИЯ'] ||= dt2                 if dt2.present?
-          z.each { |key, value| hash[key] = value if value.present? }
-          hash
-        end
+        .where(prms)
+      count = scope.count
+      scope = scope.limit(limit) if limit
+      scope = scope.offset(offset) if offset
+      data = scope.all.map do |z|
+        z = z.attributes
+        hash = {}
+        schema = parse_json(z.delete('Schema'))
+        inform = parse_json(z.delete('Information'))
+        (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] if inform[i].present? }
+        dt = parse_date([z.delete('DayBirth'), z.delete('MonthBirth'), z.delete('YearBirth')])
+        dt2 = parse_date([hash.delete('ДАТА РОЖДЕНИЯ'), hash.delete('Месяц'), hash.delete('Год')])
+        dt3 = parse_date([hash.delete('Дата выдачи'), hash.delete('Мес выдачи'), hash.delete('Год выдачи')])
+        pasp = [hash.delete('Серия паспорта'), hash.delete('Номер паспорта')].compact.join
+        name = [z.delete('LastName'), z.delete('FirstName'), z.delete('MiddleName')].compact.join(' ')
+        hash['ИМЯ']           = name                  if name.present?
+        hash['ИСТОЧНИК']      = z.delete('Base')
+        hash['ПАСПОРТ']       = z.delete('Passport')
+        hash['ПАСПОРТ_']      = pasp if pasp.present?
+        hash['ПАСПОРТ_ВЫДАН'] = dt3 if dt3
+        hash['СНИЛС']         = z.delete('SNILS')     if z['SNILS'].present?
+        hash['ИНН']           = z.delete('INN')       if z['INN'].present?
+        hash['ТЕЛЕФОН']       = z.delete('Telephone') if z['Telephone'].present?
+        hash['ДАТА РОЖДЕНИЯ'] = dt                    if dt.present?
+        hash['ДАТА РОЖДЕНИЯ'] ||= dt2                 if dt2.present?
+        z.each { |key, value| hash[key] = value if value.present? }
+        hash
+      end
+      { count: count, errors: [], data: data }
     else
-      []
+      { count: 0, errors: [{ code: :wrong_params, message: 'wrong parameters' } ], data: [] }
     end
-    errors = []
-    errors << { code: :wrong_params, message: 'wrong parameters' } if prms.blank?
-    { count: data.size, errors: errors, data: data }
   end
 
   def parse_json(str)
@@ -112,6 +118,6 @@ class Api::Persons::SearchController < ApplicationController
   end
 
   def person_params
-    @params ||= params.permit(%i[last_name first_name middle_name birthdate birthdate_year phone city street building apartment])
+    @params ||= params.permit(%i[last_name first_name middle_name birthdate birthdate_year phone city street building apartment limit offset])
   end
 end
