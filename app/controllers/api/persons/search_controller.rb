@@ -8,6 +8,7 @@ class Api::Persons::SearchController < ApplicationController
   def create
     handler do
       prms = {}
+      prms[:INN] = person_params[:inn].upcase if person_params[:inn].present?
       prms[:LastName] = person_params[:last_name].upcase if person_params[:last_name].present?
       prms[:FirstName] = person_params[:first_name].upcase if person_params[:first_name].present?
       prms[:MiddleName] = person_params[:middle_name].upcase if person_params[:middle_name].present?
@@ -78,6 +79,7 @@ class Api::Persons::SearchController < ApplicationController
       data = scope.all.map do |z|
         z = z.attributes
         hash = {}
+        passport = z.delete('Passport')
         schema = parse_json(z.delete('Schema'))
         inform = parse_json(z.delete('Information'))
         (0..schema.size-1).each { |i| hash[schema[i]] = inform[i] if inform[i].present? }
@@ -88,7 +90,7 @@ class Api::Persons::SearchController < ApplicationController
         name = [z.delete('LastName'), z.delete('FirstName'), z.delete('MiddleName')].compact.join(' ')
         hash['ИМЯ']           = name                  if name.present?
         hash['ИСТОЧНИК']      = z.delete('Base')
-        hash['ПАСПОРТ']       = z.delete('Passport')
+        hash['ПАСПОРТ']       = passport if passport.present?
         hash['ПАСПОРТ_']      = pasp if pasp.present?
         hash['ПАСПОРТ_ВЫДАН'] = dt3 if dt3
         hash['СНИЛС']         = z.delete('SNILS')     if z['SNILS'].present?
@@ -118,6 +120,6 @@ class Api::Persons::SearchController < ApplicationController
   end
 
   def person_params
-    @params ||= params.permit(%i[last_name first_name middle_name birthdate birthdate_year phone city street building apartment limit offset])
+    @params ||= params.permit(%i[inn last_name first_name middle_name birthdate birthdate_year phone city street building apartment limit offset])
   end
 end
