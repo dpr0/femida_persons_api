@@ -4,10 +4,11 @@ class Api::Persons::SearchController < ApplicationController
   protect_from_forgery with: :null_session
   before_action :authenticate_request
 
-  api :POST, '/search {last_name: "", first_name: "", middle_name: "", birthdate: "", birthdate_year: "", phone: ""', 'Поиск по ФИО/Др/Год рождения/Тел'
+  api :POST, '/search {last_name: "", first_name: "", middle_name: "", birthdate: "", birthdate_year: "", phone: "", grn: ""', 'Поиск по ФИО/Др/Год рождения/Тел'
   def create
     handler do
       prms = {}
+      prms[:Car] = person_params[:grn].upcase if person_params[:grn].present?
       prms[:INN] = person_params[:inn].upcase if person_params[:inn].present?
       prms[:LastName] = person_params[:last_name].upcase if person_params[:last_name].present?
       prms[:FirstName] = person_params[:first_name].upcase if person_params[:first_name].present?
@@ -46,6 +47,15 @@ class Api::Persons::SearchController < ApplicationController
     handler do
       prms = {}
       prms[:Telephone] = person_params[:phone].last(10) if person_params[:phone].present?
+      prms
+    end
+  end
+
+  api :GET, '/search/by_grnz?grn=:str', 'Поиск по ГРН'
+  def by_grn
+    handler do
+      prms = {}
+      prms[:Car] = person_params[:grn] if person_params[:grn].present?
       prms
     end
   end
