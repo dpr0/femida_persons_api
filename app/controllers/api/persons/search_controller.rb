@@ -55,7 +55,7 @@ class Api::Persons::SearchController < ApplicationController
   def by_grn
     handler do
       prms = {}
-      prms[:Car] = person_params[:grn] if person_params[:grn].present?
+      prms[:Car] = person_params[:grn].upcase if person_params[:grn].present?
       prms
     end
   end
@@ -77,12 +77,14 @@ class Api::Persons::SearchController < ApplicationController
   end
 
   def search(prms)
+    grn = prms.delete(:Car)
     limit = prms.delete(:limit)
     offset = prms.delete(:offset)
-    if prms.present?
+    if prms.present? || (grn && grn.size > 4)
       scope = Person.eager_load(:base)
         .select(%i[FirstName LastName MiddleName Telephone Car Passport DayBirth MonthBirth YearBirth SNILS INN Information Base Base_Schemes.Schema])
         .where(prms)
+      scope = scope.where('"persons_with_fts"."Car" LIKE ?', "%#{grn}%") if grn
       count = scope.count
       scope = scope.limit(limit) if limit
       scope = scope.offset(offset) if offset
@@ -130,6 +132,6 @@ class Api::Persons::SearchController < ApplicationController
   end
 
   def person_params
-    @params ||= params.permit(%i[inn last_name first_name middle_name birthdate birthdate_year phone city street building apartment limit offset])
+    @params ||= params.permit(%i[inn grn last_name first_name middle_name birthdate birthdate_year phone city street building apartment limit offset])
   end
 end
